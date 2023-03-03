@@ -2,7 +2,7 @@ library(tidyverse)
 
 
 #### set-up nodes ####
-nodes_type <- c(rep(1, 5), rep(4,5))
+nodes_type <- c(rep(1, 10), rep(2,10))
 nodes_type <- sort(nodes_type)
 cumsum_nodes_type <- cumsum(nodes_type)
 n_nodes <- length(nodes_type)
@@ -36,8 +36,8 @@ for (j in 1:p) {
 for (j in 1:p) {
     for (i in (p+1):(p+q)) {
         if(abs(j-i)==p){
-            EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(.25,-.25),2), EMat)
-            # EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(.25,-.25),1), EMat)
+            # EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(.25,-.25),2), EMat)
+            EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(.25,-.25),1), EMat)
 
         }
     }
@@ -47,8 +47,8 @@ for (j in 1:p) {
 for (j in (p+1):(p+q)) {
     for (i in j:(p+q)) {
         if(abs(j-i)==1){
-            EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(1,-1,1,-1,       -1,1,-1,1),2), EMat)
-            # EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(.5,-.5,-.5,.5),1), EMat)
+            # EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(1,-1,1,-1,       -1,1,-1,1),2), EMat)
+            EMat <- setUp_edge(NODE_I = i, NODE_J = j, VAL = rep(c(.5,-.5,-.5,.5),1), EMat)
 
         }
     }
@@ -124,25 +124,25 @@ for (j in 1:r) {
 #########
 graphR_obj <- function(theta){
     graph <- graph_cl(
-        data = as.matrix(data),
-        theta = theta,
-        nodes_type
+        DATA = as.matrix(data),
+        THETA = theta,
+        NODES_TYPE = nodes_type
     )
 
     -graph$cl
 }
 graphR_gr <- function(theta){
     graph <- graph_cl(
-        data = as.matrix(data),
-        theta = theta,
-        nodes_type
+        DATA = as.matrix(data),
+        THETA = theta,
+        NODES_TYPE = nodes_type
     )
 
     -graph$gradient
 }
 ##########
 library(tidyverse)
-sample_size <- c(500)
+sample_size <- c(1000)
 nsim <- 2
 sim_setting <- expand_grid(n = sample_size, sim_id = 1:nsim) %>%
     mutate(id = row_number()) %>%
@@ -158,26 +158,26 @@ tol <- 1e-5; step <- 5e-1; counter <- 15; maxiter <- 10*(p+q)
 ## deterministic ###
 data <- sim_setting$data[[1]]
 set.seed(123)
-nu <- round(sample_size*(p+q)*.5, 0)
 nu <- round(sample_size*.1,0)
 mod <- mixedGraph(
     DATA = as.matrix(data),
     SDS = fun_sd(data, P=p, Q=q), #rep(1, p+q),#
     THETA = theta_init,
     NODES_TYPE = nodes_type,
-    MAXITER = maxiter,
+    MAXITER = 50,
     STEPSIZE = 1,#step,
     SAMPLING_SCHEME = 2,
-    REG_PAR = 2.5*sqrt(log(p+q)/(nrow(data))),
+    REG_PAR = 6.8*sqrt(log(p+q)/(nrow(data))),
     NU = nu,
     TOL = 1e-10,
     TOL_MINCOUNT = maxiter,
     VERBOSEFLAG = F,
-    EPS = .75
+    EPS = .95,
+    REGFLAG = T
 )
 
 summary(clock, units = 's')[summary(clock, units = 's')$ticker=='Main',]
-
+seq(5*sqrt(log(p+q)/(nrow(data))), 10*sqrt(log(p+q)/(nrow(data))), length.out = 10)
 # mod$path_theta_diff[1,]
 # mod$path_theta[2,] - mod$path_theta[1,]
 # mod$path_nll[mod$last_iter]
@@ -187,17 +187,93 @@ summary(clock, units = 's')[summary(clock, units = 's')$ticker=='Main',]
 
 #-graphR_gr(mod$path_theta[10,]) ; mod$path_grad[10,]
 #mod$path_theta
-est_theta <- mod$path_theta[mod$last_iter+1,]
-est_theta_path <- tibble(iter = 0:(nrow(mod$path_theta)-1), theta = as.list(data.frame(t(mod$path_theta))))
-est_theta_path %>% pluck('theta')
-est_theta_path <- est_theta_path %>%
+est_theta <- reduce(mod$path_theta, rbind)[mod$last_iter+1,]
+est_theta_path <- tibble(iter = 0:(length(mod$path_theta)-1), theta = mod$path_theta)
+#est_theta_path %>% pluck('theta')
+rate_path <- est_theta_path %>%
     mutate(
         rates = map(theta, ~tidy_recovery(
             edgeMat,
             theta_to_edgesPar(.x, nodes_type, cumsum_nodes_type, p, r, n_nodes),
             P = p, Q = q)$rates)
     ) %>%
-    unnest(rates)
+    unnest(rates) %>%
+    gather(key = 'recovery', val = 'rate', tp, tt, tn)
+
+
+
+rate_path %>%
+    #filter(iter < (nrow(mod$path_theta)-1)) %>%
+    ggplot(aes(x = iter, y = rate))+
+    geom_line(aes(col = recovery))+
+    theme_light()
+#length(mod$path_check)
+tibble(iter = 1:length(mod$path_check)) %>%
+    mutate(diff = map_dbl(iter, ~mod$path_check[.x])
+    ) %>%
+    ggplot(aes(x =iter, y = diff)) +
+    geom_line()+
+    geom_hline(yintercept = 0, linetype = 'dashed') +
+    theme_light()
+
+tibble(iter = 1:length(mod$path_nll)) %>%
+    mutate(nll = map_dbl(iter, ~mod$path_nll[.x])
+    ) %>%
+    ggplot(aes(x =iter, y = nll)) +
+    geom_line()+
+    theme_light()
+
+tibble(iter = 0:(length(mod$path_theta)-1), theta = mod$path_theta) %>%
+    mutate(
+        mse = map_dbl(theta, ~mean((.x-true_theta)^2))
+    ) %>%
+    ggplot(aes(x = iter, y = mse))+
+    geom_line()+
+    theme_light()
+tmat <- edgeMat
+tmat[upper.tri(tmat)] <- NaN
+diag(tmat) <- NaN
+emat <- theta_to_edgesPar(est_theta, nodes_type, cumsum_nodes_type, p, r, n_nodes)
+emat[upper.tri(emat)] <- NaN
+diag(emat) <- NaN
+as_tibble(tmat) %>%
+    mutate(row_lab=paste0('V',1:r)) %>%
+    gather(key = 'col_lab', value = 'val', starts_with('V')) %>%
+    mutate(
+        row_lab = factor(row_lab, levels = paste0('V',r:1), labels = paste0('V',r:1), ordered = T),
+        col_lab = factor(col_lab, levels = paste0('V',1:r), labels = paste0('V',1:r), ordered = T)
+    ) %>%
+    ggplot(aes(x = col_lab, y = row_lab)) +
+    geom_tile(aes(fill=val))+
+    scale_fill_viridis_c()
+
+as_tibble(emat) %>%
+    mutate(row_lab=paste0('V',1:r)) %>%
+    gather(key = 'col_lab', value = 'val', starts_with('V')) %>%
+    mutate(mat_lab = 'est') %>%
+    bind_rows(
+        as_tibble(tmat) %>%
+            mutate(row_lab=paste0('V',1:r)) %>%
+            gather(key = 'col_lab', value = 'val', starts_with('V')) %>%
+            mutate(mat_lab = 'true')
+    )%>%
+    mutate(
+        row_lab = factor(row_lab, levels = paste0('V',r:1), labels = paste0('V',r:1), ordered = T),
+        col_lab = factor(col_lab, levels = paste0('V',1:r), labels = paste0('V',1:r), ordered = T)    ) %>%
+    ggplot(aes(x = col_lab, y = row_lab)) +
+    geom_tile(aes(fill=(val)))+
+    facet_wrap(vars(mat_lab))+
+    scale_fill_gradient2()
+
+# nll_path <- est_theta_path %>%
+#     mutate(
+#         path_nll = map_dbl(theta, ~graphR_obj(.x))
+#     )
+
+nll_path %>%
+    ggplot(aes(x = iter, y = path_nll))+
+    geom_line()
+
 Matrix::Matrix(theta_to_edgesPar(est_theta, nodes_type, cumsum_nodes_type, p, r, n_nodes), sparse = T)
 Matrix::Matrix(edgeMat, sparse = T)
 Matrix::Matrix(edgeMat_init, sparse = T)
@@ -285,7 +361,7 @@ as_tibble(emat) %>%
         row_lab = factor(row_lab, levels = paste0('V',r:1), labels = paste0('V',r:1), ordered = T),
         col_lab = factor(col_lab, levels = paste0('V',1:r), labels = paste0('V',1:r), ordered = T)    ) %>%
     ggplot(aes(x = col_lab, y = row_lab)) +
-    geom_tile(aes(fill=sign(val)))+
+    geom_tile(aes(fill=(val)))+
     facet_wrap(vars(mat_lab))+
     scale_fill_gradient2()
 
@@ -351,3 +427,100 @@ a
 list(a)
 as.list(data.frame(t(a)))
 tibble(iter = 0:(nrow(a)-1), theta = as.list(data.frame(t(a))))
+
+
+#### Second version ####
+##########
+library(tidyverse)
+sample_size <- c(500)
+nsim <- 2
+sim_setting <- expand_grid(n = sample_size, sim_id = 1:nsim) %>%
+    mutate(id = row_number()) %>%
+    select(id, everything()) %>%
+    mutate(
+        data = map(n, ~reduce(graphGibbs$chains, rbind)[sample(1:nrow(graphGibbs$chains[[1]]), .x, replace = F),])
+    )
+
+
+#save(sim_setting, file = 'sim_setting.RData')
+cores <- 2
+tol <- 1e-5; step <- 5e-1; counter <- 15; maxiter <- 10*(p+q)
+## deterministic ###
+data <- sim_setting$data[[1]]
+set.seed(123)
+nu <- round(sample_size*.01,0)
+mod_SVRG <- mixedGraph_SVRG(
+    DATA = as.matrix(data),
+    SDS = fun_sd(data, P=p, Q=q), #rep(1, p+q),#
+    THETA = theta_init,
+    NODES_TYPE = nodes_type,
+    MAXITER = 1,
+    STEPSIZE = 1,#step,
+    SAMPLING_SCHEME = 1,
+    REG_PAR = 5*sqrt(log(p+q)/(nrow(data))),
+    M = 200,
+    NU = nu,
+    TOL = 1e-10,
+    TOL_MINCOUNT = maxiter,
+    VERBOSEFLAG = F,
+    EPS = .95,
+    REGFLAG = T
+)
+#mod_SVRG$path_grad_iter_ref[[2]]-mod_SVRG$path_grad[[2]]
+#mod_SVRG$path_grad_SVRG[[2]]-mod_SVRG$path_grad_ref[[1]]
+# mod$path_theta
+# as_tibble(reduce(mod$path_theta, rbind))
+# length(mod$path_theta)
+# summary(clock, units = 's')[summary(clock, units = 's')$ticker=='Main',]
+
+# mod$path_theta_diff[1,]
+# mod$path_theta[2,] - mod$path_theta[1,]
+# mod$path_nll[mod$last_iter]
+# mod$path_theta_check[1]
+# mod$path_thetaDiff[1]/mod$path_thetaNorm[1]
+# norm(as.matrix(mod$path_theta[2,] - mod$path_theta[1,]), type = 'F') / norm(as.matrix(mod$path_theta[1,]), type = 'F')
+
+#-graphR_gr(mod$path_theta[10,]) ; mod$path_grad[10,]
+#mod$path_theta
+est_theta <- reduce(mod_SVRG$path_theta, rbind)[mod_SVRG$last_iter+1,]
+est_theta_path <- tibble(iter = 0:(length(mod_SVRG$path_theta)-1), theta = mod_SVRG$path_theta)
+#est_theta_path %>% pluck('theta')
+est_theta_path <- est_theta_path %>%
+    mutate(
+        rates = map(theta, ~tidy_recovery(
+            edgeMat,
+            theta_to_edgesPar(.x, nodes_type, cumsum_nodes_type, p, r, n_nodes),
+            P = p, Q = q)$rates)
+    ) %>%
+    unnest(rates) %>%
+    gather(key = 'recovery', val = 'rate', tp, tt, tn)
+
+
+
+est_theta_path %>%
+    #filter(iter < (nrow(mod$path_theta)-1)) %>%
+    ggplot(aes(x = iter, y = rate))+
+    geom_line(aes(col = recovery))+
+    theme_light()
+#length(mod$path_check)
+tibble(iter = 1:length(mod_SVRG$path_check)) %>%
+    mutate(diff = map_dbl(iter, ~mod_SVRG$path_check[.x])
+    ) %>%
+    ggplot(aes(x =iter, y = diff)) +
+    geom_line()+
+    geom_hline(yintercept = 1e-3, linetype = 'dashed') +
+    theme_light()
+tibble(iter = 1:length(mod_SVRG$path_nll)) %>%
+    mutate(nll = map_dbl(iter, ~mod_SVRG$path_nll[.x])
+    ) %>%
+    ggplot(aes(x =iter, y = nll)) +
+    geom_line()+
+    geom_hline(yintercept = 1e-3, linetype = 'dashed') +
+    theme_light()
+tibble(iter = 0:(length(mod_SVRG$path_theta)-1), theta = mod_SVRG$path_theta) %>%
+    mutate(
+        mse = map_dbl(theta, ~mean((.x-true_theta)^2))
+    ) %>%
+    ggplot(aes(x = iter, y = mse))+
+    geom_line()
+

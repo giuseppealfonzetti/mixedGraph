@@ -52,6 +52,11 @@ mixedGraph <- function(DATA, SDS, THETA, NODES_TYPE, MAXITER, STEPSIZE, REG_PAR,
     .Call(`_mixedGraph_mixedGraph`, DATA, SDS, THETA, NODES_TYPE, MAXITER, STEPSIZE, REG_PAR, NU, TOL, TOL_MINCOUNT, VERBOSEFLAG, REGFLAG, BURN, SAMPLING_SCHEME, SEED, EPS)
 }
 
+#' @export
+mixedGraph_SVRG <- function(DATA, SDS, THETA, NODES_TYPE, MAXITER, STEPSIZE, REG_PAR, M, NU = 1, TOL = 1e-4, TOL_MINCOUNT = 4L, VERBOSEFLAG = FALSE, REGFLAG = TRUE, BURN = 25L, SAMPLING_SCHEME = 1L, SEED = 123L, EPS = .55) {
+    .Call(`_mixedGraph_mixedGraph_SVRG`, DATA, SDS, THETA, NODES_TYPE, MAXITER, STEPSIZE, REG_PAR, M, NU, TOL, TOL_MINCOUNT, VERBOSEFLAG, REGFLAG, BURN, SAMPLING_SCHEME, SEED, EPS)
+}
+
 proximal_stepR <- function(theta, Dvec, nodes_type, cumsum_nodes_type, p, r, n_nodes, lambda, gamma, verboseFLAG = FALSE) {
     .Call(`_mixedGraph_proximal_stepR`, theta, Dvec, nodes_type, cumsum_nodes_type, p, r, n_nodes, lambda, gamma, verboseFLAG)
 }

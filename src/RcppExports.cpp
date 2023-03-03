@@ -238,6 +238,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mixedGraph_SVRG
+Rcpp::List mixedGraph_SVRG(const Eigen::MatrixXd& DATA, const std::vector<double>& SDS, const Eigen::VectorXd& THETA, const std::vector<unsigned int> NODES_TYPE, const unsigned int MAXITER, double STEPSIZE, const double REG_PAR, const unsigned int M, const double NU, const double TOL, const unsigned int TOL_MINCOUNT, const bool VERBOSEFLAG, const bool REGFLAG, const unsigned int BURN, const unsigned int SAMPLING_SCHEME, const unsigned int SEED, const double EPS);
+RcppExport SEXP _mixedGraph_mixedGraph_SVRG(SEXP DATASEXP, SEXP SDSSEXP, SEXP THETASEXP, SEXP NODES_TYPESEXP, SEXP MAXITERSEXP, SEXP STEPSIZESEXP, SEXP REG_PARSEXP, SEXP MSEXP, SEXP NUSEXP, SEXP TOLSEXP, SEXP TOL_MINCOUNTSEXP, SEXP VERBOSEFLAGSEXP, SEXP REGFLAGSEXP, SEXP BURNSEXP, SEXP SAMPLING_SCHEMESEXP, SEXP SEEDSEXP, SEXP EPSSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< const std::vector<double>& >::type SDS(SDSSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type NODES_TYPE(NODES_TYPESEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type MAXITER(MAXITERSEXP);
+    Rcpp::traits::input_parameter< double >::type STEPSIZE(STEPSIZESEXP);
+    Rcpp::traits::input_parameter< const double >::type REG_PAR(REG_PARSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type M(MSEXP);
+    Rcpp::traits::input_parameter< const double >::type NU(NUSEXP);
+    Rcpp::traits::input_parameter< const double >::type TOL(TOLSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type TOL_MINCOUNT(TOL_MINCOUNTSEXP);
+    Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
+    Rcpp::traits::input_parameter< const bool >::type REGFLAG(REGFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type BURN(BURNSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_SCHEME(SAMPLING_SCHEMESEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    Rcpp::traits::input_parameter< const double >::type EPS(EPSSEXP);
+    rcpp_result_gen = Rcpp::wrap(mixedGraph_SVRG(DATA, SDS, THETA, NODES_TYPE, MAXITER, STEPSIZE, REG_PAR, M, NU, TOL, TOL_MINCOUNT, VERBOSEFLAG, REGFLAG, BURN, SAMPLING_SCHEME, SEED, EPS));
+    return rcpp_result_gen;
+END_RCPP
+}
 // proximal_stepR
 Rcpp::List proximal_stepR(const Eigen::VectorXd& theta, const Eigen::VectorXd& Dvec, const std::vector<unsigned int> nodes_type, const std::vector<unsigned int> cumsum_nodes_type, const unsigned int p, const unsigned int r, const unsigned int n_nodes, const double lambda, const double gamma, const bool verboseFLAG);
 RcppExport SEXP _mixedGraph_proximal_stepR(SEXP thetaSEXP, SEXP DvecSEXP, SEXP nodes_typeSEXP, SEXP cumsum_nodes_typeSEXP, SEXP pSEXP, SEXP rSEXP, SEXP n_nodesSEXP, SEXP lambdaSEXP, SEXP gammaSEXP, SEXP verboseFLAGSEXP) {
@@ -450,6 +477,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mixedGraph_graph_cl", (DL_FUNC) &_mixedGraph_graph_cl, 4},
     {"_mixedGraph_mixedGraph_old", (DL_FUNC) &_mixedGraph_mixedGraph_old, 17},
     {"_mixedGraph_mixedGraph", (DL_FUNC) &_mixedGraph_mixedGraph, 16},
+    {"_mixedGraph_mixedGraph_SVRG", (DL_FUNC) &_mixedGraph_mixedGraph_SVRG, 17},
     {"_mixedGraph_proximal_stepR", (DL_FUNC) &_mixedGraph_proximal_stepR, 10},
     {"_mixedGraph_intMultinom", (DL_FUNC) &_mixedGraph_intMultinom, 3},
     {"_mixedGraph_drawCatNode", (DL_FUNC) &_mixedGraph_drawCatNode, 7},
