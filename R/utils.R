@@ -1,5 +1,5 @@
 #'@export
-setUp_edge <- function(NODE_I, NODE_J, VAL, EDGEMAT){
+setUp_edge <- function(NODE_I, NODE_J, VAL, EDGEMAT, NODES_TYPE, CUMSUM_NODES_TYPE){
     if(NODE_I < NODE_J){
         #cat("ERROR: interested cells must be in the lower triangular edge matrix!\n")
     }else{
@@ -7,9 +7,9 @@ setUp_edge <- function(NODE_I, NODE_J, VAL, EDGEMAT){
             EDGEMAT[NODE_I, NODE_J] <- VAL
             #cat(paste0("beta_", NODE_I, NODE_J), "modified.\n")
         }else if(NODE_I > p & NODE_J <= p){
-            cat_i <- nodes_type[NODE_I]
-            row_start <- cumsum_nodes_type[NODE_I-1] + 1
-            row_end <- cumsum_nodes_type[NODE_I-1] + cat_i
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
             if(length(VAL) <= cat_i){
                 EDGEMAT[row_start:row_end, NODE_J] <- VAL
                 #cat(paste0("rho_", NODE_I, NODE_J), "modified.\n")
@@ -18,12 +18,12 @@ setUp_edge <- function(NODE_I, NODE_J, VAL, EDGEMAT){
             }
 
         }else if(NODE_I > p & NODE_J > p & NODE_I != NODE_J){
-            cat_i <- nodes_type[NODE_I]
-            row_start <- cumsum_nodes_type[NODE_I-1] + 1
-            row_end <- cumsum_nodes_type[NODE_I-1] + cat_i
-            cat_j <- nodes_type[NODE_J]
-            col_start <- cumsum_nodes_type[NODE_J-1] + 1
-            col_end <- cumsum_nodes_type[NODE_J-1] + cat_j
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
+            cat_j <- NODES_TYPE[NODE_J]
+            col_start <- CUMSUM_NODES_TYPE[NODE_J-1] + 1
+            col_end <- CUMSUM_NODES_TYPE[NODE_J-1] + cat_j
             if(length(VAL) <= cat_i*cat_j){
                 EDGEMAT[row_start:row_end, col_start:col_end] <- VAL
                 #cat(paste0("phi_", NODE_I, NODE_J), "modified.\n")
@@ -31,9 +31,9 @@ setUp_edge <- function(NODE_I, NODE_J, VAL, EDGEMAT){
                 #cat("ERROR: value object too long!\n")
             }
         }else if(NODE_I > p & NODE_J > p & NODE_I == NODE_J){
-            cat_i <- nodes_type[NODE_I]
-            row_start <- cumsum_nodes_type[NODE_I-1] + 1
-            row_end <- cumsum_nodes_type[NODE_I-1] + cat_i
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
             EDGEMAT[row_start:row_end, row_start:row_end] <- diag(VAL, cat_i, cat_i)
             #cat(paste0("phi_", NODE_I, NODE_J), "modified.\n")
         }
