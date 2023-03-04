@@ -38,8 +38,8 @@ dHess_continuous_node <- function(E, betass, xi, p, s, dim_edgesPar, data, nodes
 }
 
 #' @export
-graph_cl <- function(DATA, THETA, NODES_TYPE, VERBOSEFLAG = FALSE) {
-    .Call(`_mixedGraph_graph_cl`, DATA, THETA, NODES_TYPE, VERBOSEFLAG)
+graph_cl <- function(DATA, THETA, NODES_TYPE, VERBOSEFLAG = FALSE, GRADFLAG = FALSE, GRAD2FLAG = FALSE) {
+    .Call(`_mixedGraph_graph_cl`, DATA, THETA, NODES_TYPE, VERBOSEFLAG, GRADFLAG, GRAD2FLAG)
 }
 
 #' @export

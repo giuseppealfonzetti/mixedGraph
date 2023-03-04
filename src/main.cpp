@@ -23,7 +23,10 @@ Rcpp::List graph_cl(
     const Eigen::MatrixXd &DATA,
     const Eigen::VectorXd &THETA,
     const std::vector<unsigned int> NODES_TYPE,
-    const bool VERBOSEFLAG = false
+    const bool VERBOSEFLAG = false,
+    const bool GRADFLAG = false,
+    const bool GRAD2FLAG = false
+
 ){
 
   // Identify dimensions
@@ -61,16 +64,16 @@ Rcpp::List graph_cl(
         const double xi = datai(node);
         const double node_l = logp_continuous_node(Ei, edgesPar(node, node), xi);
         cl += node_l;
-        gradient += gradient_continuous_node(Ei, edgesPar(node, node), xi, p, node, edgesPar.cols(), datai, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
-        dHess += dHess_continuous_node(Ei, edgesPar(node, node), xi, p, node, edgesPar.cols(), datai, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
+        if(GRADFLAG)gradient += gradient_continuous_node(Ei, edgesPar(node, node), xi, p, node, edgesPar.cols(), datai, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
+        if(GRAD2FLAG)dHess += dHess_continuous_node(Ei, edgesPar(node, node), xi, p, node, edgesPar.cols(), datai, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
 
 
       }else{
         const double node_l = logp_categorical_node(datai, edgesPar, node, p, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
         cl += node_l;
         std::vector<double> probs(NODES_TYPE[node]);
-        gradient += gradientV2_categorical_node(datai, edgesPar, probs, node, p, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
-        dHess += dHess_categorical_node(datai, edgesPar, probs, node, p, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
+        if(GRADFLAG)gradient += gradientV2_categorical_node(datai, edgesPar, probs, node, p, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
+        if(GRAD2FLAG)dHess += dHess_categorical_node(datai, edgesPar, probs, node, p, NODES_TYPE, cumsum_nodes_type, VERBOSEFLAG);
 
       }
     }

@@ -172,8 +172,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // graph_cl
-Rcpp::List graph_cl(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA, const std::vector<unsigned int> NODES_TYPE, const bool VERBOSEFLAG);
-RcppExport SEXP _mixedGraph_graph_cl(SEXP DATASEXP, SEXP THETASEXP, SEXP NODES_TYPESEXP, SEXP VERBOSEFLAGSEXP) {
+Rcpp::List graph_cl(const Eigen::MatrixXd& DATA, const Eigen::VectorXd& THETA, const std::vector<unsigned int> NODES_TYPE, const bool VERBOSEFLAG, const bool GRADFLAG, const bool GRAD2FLAG);
+RcppExport SEXP _mixedGraph_graph_cl(SEXP DATASEXP, SEXP THETASEXP, SEXP NODES_TYPESEXP, SEXP VERBOSEFLAGSEXP, SEXP GRADFLAGSEXP, SEXP GRAD2FLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -181,7 +181,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type NODES_TYPE(NODES_TYPESEXP);
     Rcpp::traits::input_parameter< const bool >::type VERBOSEFLAG(VERBOSEFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(graph_cl(DATA, THETA, NODES_TYPE, VERBOSEFLAG));
+    Rcpp::traits::input_parameter< const bool >::type GRADFLAG(GRADFLAGSEXP);
+    Rcpp::traits::input_parameter< const bool >::type GRAD2FLAG(GRAD2FLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(graph_cl(DATA, THETA, NODES_TYPE, VERBOSEFLAG, GRADFLAG, GRAD2FLAG));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -474,7 +476,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mixedGraph_logp_continuous_node", (DL_FUNC) &_mixedGraph_logp_continuous_node, 3},
     {"_mixedGraph_gradient_continuous_node", (DL_FUNC) &_mixedGraph_gradient_continuous_node, 10},
     {"_mixedGraph_dHess_continuous_node", (DL_FUNC) &_mixedGraph_dHess_continuous_node, 10},
-    {"_mixedGraph_graph_cl", (DL_FUNC) &_mixedGraph_graph_cl, 4},
+    {"_mixedGraph_graph_cl", (DL_FUNC) &_mixedGraph_graph_cl, 6},
     {"_mixedGraph_mixedGraph_old", (DL_FUNC) &_mixedGraph_mixedGraph_old, 17},
     {"_mixedGraph_mixedGraph", (DL_FUNC) &_mixedGraph_mixedGraph, 16},
     {"_mixedGraph_mixedGraph_SVRG", (DL_FUNC) &_mixedGraph_mixedGraph_SVRG, 17},
