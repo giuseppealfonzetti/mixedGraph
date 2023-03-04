@@ -198,3 +198,42 @@ tidy_recovery <- function(TRUE_EDGE, EST_EDGE, P, Q, NODES_TYPE, CUMSUM_NODES_TY
         )
     )
 }
+
+#'@export
+check_edge_intensity <- function(NODE_I, NODE_J, EDGEMAT, NODES_TYPE, CUMSUM_NODES_TYPE){
+    out <- FALSE
+    if(NODE_I < NODE_J){
+        #cat("ERROR: interested cells must be in the lower triangular edge matrix!\n")
+    }else{
+        if(NODE_I <= p & NODE_J <= p){
+            out <- mean(abs(EDGEMAT[NODE_I, NODE_J]))
+            #cat(paste0("beta_", NODE_I, NODE_J), "modified.\n")
+        }else if(NODE_I > p & NODE_J <= p){
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
+            out <- mean(abs((EDGEMAT[row_start:row_end, NODE_J] )))
+            #cat(paste0("rho_", NODE_I, NODE_J), "modified.\n")
+
+
+        }else if(NODE_I > p & NODE_J > p & NODE_I != NODE_J){
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
+            cat_j <- NODES_TYPE[NODE_J]
+            col_start <- CUMSUM_NODES_TYPE[NODE_J-1] + 1
+            col_end <- CUMSUM_NODES_TYPE[NODE_J-1] + cat_j
+            out <- mean(abs(EDGEMAT[row_start:row_end, col_start:col_end] ))
+            #cat(paste0("phi_", NODE_I, NODE_J), "modified.\n")
+        }else if(NODE_I > p & NODE_J > p & NODE_I == NODE_J){
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
+            out <- mean(abs(EDGEMAT[row_start:row_end, row_start:row_end] ))
+            #cat(paste0("phi_", NODE_I, NODE_J), "modified.\n")
+        }
+    }
+
+    return(out)
+}
+
