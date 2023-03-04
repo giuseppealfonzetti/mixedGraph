@@ -129,7 +129,7 @@ recoveryRate <- function(true_edge, est_theta, verb = F){
 }
 
 #'@export
-check_edge <- function(NODE_I, NODE_J, EDGEMAT){
+check_edge <- function(NODE_I, NODE_J, EDGEMAT, NODES_TYPE, CUMSUM_NODES_TYPE){
     out <- FALSE
     if(NODE_I < NODE_J){
         #cat("ERROR: interested cells must be in the lower triangular edge matrix!\n")
@@ -138,26 +138,26 @@ check_edge <- function(NODE_I, NODE_J, EDGEMAT){
             out <- EDGEMAT[NODE_I, NODE_J] != 0
             #cat(paste0("beta_", NODE_I, NODE_J), "modified.\n")
         }else if(NODE_I > p & NODE_J <= p){
-            cat_i <- nodes_type[NODE_I]
-            row_start <- cumsum_nodes_type[NODE_I-1] + 1
-            row_end <- cumsum_nodes_type[NODE_I-1] + cat_i
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
                 out <- sum(EDGEMAT[row_start:row_end, NODE_J] !=0) > 0
                 #cat(paste0("rho_", NODE_I, NODE_J), "modified.\n")
 
 
         }else if(NODE_I > p & NODE_J > p & NODE_I != NODE_J){
-            cat_i <- nodes_type[NODE_I]
-            row_start <- cumsum_nodes_type[NODE_I-1] + 1
-            row_end <- cumsum_nodes_type[NODE_I-1] + cat_i
-            cat_j <- nodes_type[NODE_J]
-            col_start <- cumsum_nodes_type[NODE_J-1] + 1
-            col_end <- cumsum_nodes_type[NODE_J-1] + cat_j
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
+            cat_j <- NODES_TYPE[NODE_J]
+            col_start <- CUMSUM_NODES_TYPE[NODE_J-1] + 1
+            col_end <- CUMSUM_NODES_TYPE[NODE_J-1] + cat_j
                 out <- sum(EDGEMAT[row_start:row_end, col_start:col_end] != 0) > 0
                 #cat(paste0("phi_", NODE_I, NODE_J), "modified.\n")
         }else if(NODE_I > p & NODE_J > p & NODE_I == NODE_J){
-            cat_i <- nodes_type[NODE_I]
-            row_start <- cumsum_nodes_type[NODE_I-1] + 1
-            row_end <- cumsum_nodes_type[NODE_I-1] + cat_i
+            cat_i <- NODES_TYPE[NODE_I]
+            row_start <- CUMSUM_NODES_TYPE[NODE_I-1] + 1
+            row_end <- CUMSUM_NODES_TYPE[NODE_I-1] + cat_i
             out <- sum(EDGEMAT[row_start:row_end, row_start:row_end] != 0) > 0
             #cat(paste0("phi_", NODE_I, NODE_J), "modified.\n")
         }
@@ -167,12 +167,12 @@ check_edge <- function(NODE_I, NODE_J, EDGEMAT){
 }
 
 #'@export
-tidy_recovery <- function(TRUE_EDGE, EST_EDGE, P, Q){
+tidy_recovery <- function(TRUE_EDGE, EST_EDGE, P, Q, NODES_TYPE, CUMSUM_NODES_TYPE){
     tmp <- expand_grid(row_node = 1:(P+Q), col_node = 1:(P+Q)) %>%
         filter(col_node < row_node) %>%
         mutate(
-            true_edge = map2_lgl(row_node, col_node, ~check_edge(.x,.y, TRUE_EDGE)),
-            est_edge = map2_lgl(row_node, col_node, ~check_edge(.x,.y, EST_EDGE))
+            true_edge = map2_lgl(row_node, col_node, ~check_edge(.x,.y, TRUE_EDGE, NODES_TYPE, CUMSUM_NODES_TYPE)),
+            est_edge = map2_lgl(row_node, col_node, ~check_edge(.x,.y, EST_EDGE, NODES_TYPE, CUMSUM_NODES_TYPE))
         )
 
 
